@@ -1,0 +1,90 @@
+﻿
+@page "/register"
+@using MyTaskApp.ClassLibrary
+@using MyTaskApp.Client.Services
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Linq
+@inject AuthService _authService
+@inject NavigationManager _nav
+@layout AuthLayout
+
+
+
+
+
+
+<div class="card p-5 mx-auto shadow col-11 col-md-6">
+
+    @info
+    <div class="card-header p-1"><h3>Register</h3></div>
+
+    <div class="card-body">
+        <EditForm Model="registerModel" OnValidSubmit="async ()=>await RegisterUser()">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div>
+                <div class="font-weight-light pt-2 pb-1">User Name</div>
+                <InputText @bind-Value="registerModel.UserName" class="form-control"></InputText>
+            </div>
+            <div>
+                <div class="font-weight-light pt-2 pb-1">Password</div>
+                <InputText @bind-Value="registerModel.Password" type="password" class="form-control"></InputText>
+            </div>
+            <div>
+                <div class="font-weight-light pt-2 pb-1">Confirm Password</div>
+                <InputText @bind-Value="registerModel.ConfirmPassword" type="password" class="form-control"></InputText>
+            </div>
+
+
+            <div class="text-center pt-2">
+                <button type="submit" class="btn btn-success">Register</button>
+            </div>
+            <div class="text-center pt-3">
+                or
+            </div>
+            <div class="text-center pt-1">
+                <button type="button" @onclick="ToLogin" class="btn btn-outline-primary btn-sm">Login</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+
+    RegisterModel registerModel = new RegisterModel();
+    string info = string.Empty;
+
+
+    async Task RegisterUser()
+    {
+        if (registerModel.Password!=registerModel.ConfirmPassword)
+        {
+            info = "Password doesn't match Confirm Passowrd";
+        }
+        else {
+            var result = await _authService.RegisterUserAsync(registerModel);
+            if (result.IsSuccess)
+            {
+                _nav.NavigateTo("/login");
+            }
+            else
+            {
+                var err = result.Errors;
+                foreach (var item in err)
+                {
+                    info = item.ToString();
+                }
+            }
+        }
+    }
+
+    void ToLogin()
+    {
+        _nav.NavigateTo("/login");
+
+    }
+
+
+
+    }

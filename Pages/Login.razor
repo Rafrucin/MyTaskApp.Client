@@ -1,0 +1,70 @@
+﻿@page "/login"
+
+@using MyTaskApp.ClassLibrary
+@using MyTaskApp.Client.Services
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject AuthService _authService
+@inject NavigationManager _nav
+@layout AuthLayout
+
+
+
+
+
+
+    <div class="card p-5 mx-auto shadow col-11 col-md-6">
+        <p>@info</p>
+        <div class="card-header p-1">
+            <h3>Login</h3>
+
+        </div>
+
+        <div class="card-body">
+            <EditForm Model="loginModel" OnValidSubmit="async ()=>await LoginUser()">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div>
+                    <div class="font-weight-light pt-2 pb-1">User Name</div>
+                    <InputText @bind-Value="loginModel.UserName" class="form-control"></InputText>
+                </div>
+                <div>
+                    <div class="font-weight-light pt-2 pb-1">Password</div>
+                    <InputText @bind-Value="loginModel.Password" type="password" class="form-control"></InputText>
+                </div>
+
+                <div class="text-center pt-2">
+                    <button type="submit" class="btn btn-success">Login</button>
+                </div>
+                <div class="text-center pt-3">
+                    or
+                </div>
+                <div class="text-center pt-1">
+                    <button type="button" @onclick="ToRegister" class="btn btn-outline-primary btn-sm">Register</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+
+
+@code {
+    LoginModel loginModel = new LoginModel();
+
+    string info = string.Empty;
+
+    async Task LoginUser()
+    {
+        info = await _authService.LoginUserAsync(loginModel);
+
+        if (string.IsNullOrEmpty(info))
+        {
+            _nav.NavigateTo("/");
+        }
+    }
+
+    void ToRegister()
+    {
+        _nav.NavigateTo("/register");
+
+    }
+}

@@ -1,0 +1,56 @@
+﻿
+@using MyTaskApp.ClassLibrary
+@using MyTaskApp.Client.Services
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject AuthService _authService
+
+
+
+
+<h3>LoginRegister</h3>
+
+
+
+<EditForm Model="registerModel" OnValidSubmit="async ()=>await Register()">
+    <label>UserName</label>
+    <InputText @bind-Value="registerModel.UserName"></InputText>
+    <label>Password</label>
+    <InputText @bind-Value="registerModel.Password"></InputText>
+    <label>Confirm Password</label>
+    <InputText @bind-Value="registerModel.ConfirmPassword"></InputText>
+
+    <button type="submit">submit</button>
+</EditForm>
+
+<EditForm Model="loginModel" OnValidSubmit="async ()=>await Login()">
+    <label>UserName</label>
+    <InputText @bind-Value="loginModel.UserName"></InputText>
+    <label>Password</label>
+    <InputText @bind-Value="loginModel.Password"></InputText>
+    <button type="submit">submit</button>
+</EditForm>
+
+@rr
+
+@code {
+    LoginModel loginModel = new LoginModel();
+    RegisterModel registerModel = new RegisterModel();
+
+
+    string rr = "";
+    
+    
+async Task Register()
+    {
+        var result = await _authService.RegisterUserAsync(registerModel);
+        rr = result.Message;
+    }
+
+    async Task Login()
+    {
+        await _authService.LoginUserAsync(loginModel);
+        rr = "login";
+
+    }
+
+}

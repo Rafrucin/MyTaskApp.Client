@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider auth
+@inject NavigationManager nav
+@using MyTaskApp.Client.Services
+
+<div class="sidebar">
+    <NavMenu />
+</div>
+
+<div class="main">
+    <div class="top-row px-4">
+
+        <button class="btn btn-sm" @onclick="async () => await Logout()">Logout</button>
+    </div>
+
+    <div class="content px-4">
+        @Body
+    </div>
+</div>
+
+@code{
+    async Task Logout()
+    {
+        var localStateProvider = (LocalAutenticationStateProvider)auth;
+        await localStateProvider.LogoutAsync();
+        nav.NavigateTo("/login");
+    }
+}

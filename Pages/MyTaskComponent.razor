@@ -1,0 +1,133 @@
+﻿@page "/"
+@using MyTaskApp.ClassLibrary
+@using MyTaskApp.Client.Services
+@attribute [Authorize]
+@inject IMyTaskServices _service
+@inject AuthenticationStateProvider auth
+@inject NavigationManager nav
+@layout AuthLayout
+
+<div class="col mt-1">
+    <button class="btn btn-sm btn-outline-secondary" @onclick="async () => await Logout()">Logout</button>
+</div>
+<div class="text-white text-center">Tasks by Raf</div>
+
+
+
+
+<div class="p-2">
+    <EditForm Model="@model" class="form-row ml-1 pl-1" OnValidSubmit="AddNewTask">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div>
+            <label class="text-success">Add task</label>
+            <InputText class="form-control-sm bg-dark text-light" placeholder="new task" @bind-Value="model.TaskName"></InputText>
+            <button type="submit" class="btn btn-sm btn-success">Add</button>
+        </div>
+    </EditForm>
+</div>
+
+@if (myTasks == null)
+{
+
+    <p class=" ml-3 text-warning">Loading...</p>
+
+}
+else if (myTasks.Count == 0)
+{
+    <p class=" ml-3 text-warning">No tasks</p>
+}
+else
+{
+    <table class="table table-sm table-dark mx-1 mt-1 text-warning">
+        <thead>
+            <tr>
+                <td class="text-white">Task</td>
+                <td class="text-center text-white">Done?</td>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in myTasks)
+            {
+                if (item.IsDone == false)
+                {
+                    var t = item.TaskName;
+                    <tr>
+                        <td>@t</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-primary" type="button"
+                                    @onclick="async () => await ItemDone(item)">
+                                Done
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+
+            @foreach (var item in myTasks)
+            {
+                if (item.IsDone == true)
+                {
+
+                    var t = item.TaskName;
+                    <tr class="text-muted">
+                        <td>@t</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-info" type="button"
+                                    @onclick="async () => await ItemDone(item)">
+                                Back
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <div class="text-center">
+        <button class="btn btn-sm btn-danger mb-1" type="button" @onclick="async () => await ClearDone()">Clear done</button>
+    </div>
+
+}
+@code {
+
+    string info = "Loading...";
+    List<SingleTaskModel> myTasks = new List<SingleTaskModel>();
+    SingleTaskModel model = new SingleTaskModel();
+    List<SingleTaskModel> DoneList = new List<SingleTaskModel>();
+
+
+
+    protected async override Task OnInitializedAsync()
+    {
+        myTasks = await _service.GetTasks();
+    }
+
+    async Task Logout()
+    {
+        var localStateProvider = (LocalAutenticationStateProvider)auth;
+        await localStateProvider.LogoutAsync();
+        nav.NavigateTo("/login");
+    }
+
+    private async Task AddNewTask()
+    {
+        var response = await _service.PostMyTask(model);
+        model = new SingleTaskModel();
+        myTasks = await _service.GetTasks();
+    }
+
+    private async Task ItemDone(SingleTaskModel item)
+    {
+        item.IsDone = !item.IsDone;
+        var response = await _service.UpdateItem(item);
+    }
+
+    private async Task ClearDone()
+    {
+        myTasks = await _service.DeleteTasks(myTasks);
+    }
+
+}
